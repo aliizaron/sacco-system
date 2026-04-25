@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    // Collection: users
+    // Fields: uid, name, idNumber, income, role, createdAt
+    //
+    // Collection: loans
+    // Fields: userId, amount, purpose, status, riskScore, riskJustification, createdAt
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return true; // System is open
+    }
+    
+    function isOwner(userId) {
+      return true; // System is open
+    }
+    
+    function isAdmin() {
+      return true; // System is open
+    }
+
+    function isMonitor() {
+      return true; // System is open
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'name', 'idNumber', 'income', 'role', 'createdAt']) &&
+             data.uid is string && data.name is string && data.name.size() < 100 &&
+             data.idNumber is string && data.income is number &&
+             data.role in ['admin', 'member', 'monitor'];
+    }
+
+    function isValidLoan(data) {
+      return data.keys().hasAll(['userId', 'amount', 'purpose', 'status', 'riskScore', 'riskJustification', 'createdAt']) &&
+             data.userId is string && data.amount is number && data.amount > 0 &&
+             data.purpose is string && data.status in ['pending', 'approved', 'rejected'] &&
+             data.riskScore in ['Low', 'Medium', 'High', 'Critical'];
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin() || isMonitor());
+      allow create: if isAuthenticated() && isOwner(userId) && isValidUser(request.resource.data) && request.resource.data.role in ['member', 'monitor'];
+      allow update: if isAuthenticated() && (isAdmin() || (isOwner(userId) && request.resource.data.role == resource.data.role));
+    }
+
+    match /loans/{loanId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.userId || isAdmin() || isMonitor());
+      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.userId && isValidLoan(request.resource.data);
+      allow update: if isAdmin();
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A member of the SACCO",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "name": { "type": "string", "description": "Full name" },
+        "idNumber": { "type": "string", "description": "National ID or Passport number" },
+        "income": { "type": "number", "description": "Monthly income" },
+        "role": { "type": "string", "enum": ["admin", "member", "monitor"], "description": "User role" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Account creation timestamp" }
+      },
+      "required": ["uid", "name", "idNumber", "income", "role", "createdAt"]
+    },
+    "LoanApplication": {
+      "title": "Loan Application",
+      "description": "A loan request submitted by a member",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "UID of the borrower" },
+        "amount": { "type": "number", "description": "Requested loan amount" },
+        "purpose": { "type": "string", "description": "Purpose of the loan" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"], "description": "Current status" },
+        "riskScore": { "type": "string", "enum": ["Low", "Medium", "High", "Critical"], "description": "Calculated risk level" },
+        "riskJustification": { "type": "string", "description": "AI-generated justification for the risk score" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Submission timestamp" }
+      },
+      "required": ["userId", "amount", "purpose", "status", "riskScore", "riskJustification", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile data"
+    },
+    "/loans/{loanId}": {
+      "schema": "LoanApplication",
+      "description": "Loan application records"
+    }
+  }
+}

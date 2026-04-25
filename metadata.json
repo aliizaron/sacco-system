@@ -1,0 +1,6 @@
+{
+  "name": "SACCO AI Loan Processor",
+  "description": "Comprehensive AI-driven loan application and risk assessment system.",
+  "requestFramePermissions": [],
+  "requestUserPublish": true
+}
